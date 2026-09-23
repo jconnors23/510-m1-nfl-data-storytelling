@@ -13,4 +13,4 @@ Rebuild the extract with:
 python scripts/pull_schedules.py
 ```
 
-The output is `data/nflverse_2024_reg_games.csv`: `season == 2024`, `game_type == "REG"` (regular season), final scores present. Next: [feature engineering](../docs/feature-engineering.md) and the [analysis pipeline](../docs/analysis-pipeline.md).
+The output is `data/nflverse_2024_reg_games.csv`: `season == 2024`, `game_type == "REG"` (regular season), final scores present.

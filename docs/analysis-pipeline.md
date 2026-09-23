@@ -1,8 +1,6 @@
 # Analysis pipeline
 
-How to rebuild this 2024 record-vs-scoring ranking from a clone, and how the tables connect. Scripts live in `scripts/`. Findings live on the [analysis](record-vs-point-diff-analysis.md) page. Column meanings live on [feature engineering](feature-engineering.md).
-
-A **record** like **15–2** means 15 wins and 2 losses. **Point differential** is points scored minus points allowed.
+How to rebuild the 2024 record-vs-margin run. Schema: [feature engineering](feature-engineering.md). Findings: [analysis](record-vs-point-diff-analysis.md). Commands: [README](../README.md). Attribution: [source citation](../data/source-citation.md).
 
 ## End to end
 
@@ -73,7 +71,6 @@ flowchart TD
 ```
 
 Mean `rank_gap` across 32 teams is **2.9**. Median is **2.5**. The red flag is a gap of **6** or more.
-
 ## What to open after the scripts
 
 ```mermaid
