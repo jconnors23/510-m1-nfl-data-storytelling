@@ -1,0 +1,20 @@
+# Local-only working docs and MkDocs
+local/
+local-docs/
+.mkdocs-site/
+mkdocs.yml
+
+# Editor / agent (not part of the graded GitHub tree)
+.cursor/
+.vscode/
+
+# Secrets and generated junk
+.env
+.env.*
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+.ipynb_checkpoints/
+.mplconfig/
+.ipython/

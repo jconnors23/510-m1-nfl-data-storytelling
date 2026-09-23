@@ -1,0 +1,7 @@
+# Tables (DataFrames)
+pandas>=2.2
+# Chart PNGs
+matplotlib>=3.8
+seaborn>=0.13
+# Notebook kernel Python (510-m1)
+ipykernel>=6.29
