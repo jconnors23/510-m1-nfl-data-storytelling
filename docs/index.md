@@ -5,7 +5,7 @@ hide:
 
 # Project Overview
 
-There are two common ways to sum up a football team's season: its win–loss record, and its point differential (points scored minus points allowed). This project ranks all 32 teams both ways for the 2024 season and finds the teams that rank in very different places on the two lists — at least 6 places apart. The single takeaway: neither number, on its own, tells you how good a team really was.
+A football team's season is commonly summarized two ways: by its win–loss record and by its point differential (total points scored minus total points allowed). This project ranks all 32 teams by each measure for the 2024 regular season and identifies the teams whose two rankings differ by at least six places. The conclusion is straightforward: on its own, neither measure fully captures how good a team was.
 
 This is the documentation site. The repository `README.md` has the commands to run and the list of files; the pages below carry the exploratory data analysis (EDA), the engineered features, and the story the data tells.
 
