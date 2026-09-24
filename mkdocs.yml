@@ -2,6 +2,9 @@ site_name: NFL Record vs. Point Differential (2024)
 site_description: >-
   Lines up 2024 NFL teams by win-loss record and by point differential, and
   finds the teams that land in very different spots on the two lists.
+# The public URL of the deployed site. Material uses it for canonical links and
+# social-card / preview metadata; without it those point at the wrong place.
+site_url: https://jconnors23.github.io/510-m1-nfl-data-storytelling/
 repo_url: https://github.com/jconnors23/510-m1-nfl-data-storytelling
 docs_dir: docs
 
@@ -29,9 +32,16 @@ theme:
     text: Inter
     code: JetBrains Mono
   features:
-    - navigation.instant
-    - navigation.top
-    - content.code.copy
+    - navigation.instant     # load pages without a full reload
+    - navigation.instant.progress  # thin progress bar on instant navigation
+    - navigation.top         # back-to-top button
+    - navigation.footer      # previous / next links at the page bottom
+    - content.code.copy      # copy button on code blocks
+    - search.suggest         # inline search completions
+    - search.highlight       # highlight the matched terms on the opened page
+
+plugins:
+  - search   # Material's built-in search; omitting the plugins block disables it
 
 extra_css:
   - stylesheets/extra.css

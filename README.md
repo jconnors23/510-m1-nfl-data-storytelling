@@ -1,10 +1,12 @@
 # 2024 NFL Record vs. Point Differential
 
+### 📊 Read the full write-up: **[jconnors23.github.io/510-m1-nfl-data-storytelling](https://jconnors23.github.io/510-m1-nfl-data-storytelling/)**
+
 Win–loss record and point differential (total points scored minus total points allowed) are two standard measures of a football team's season, and they can rank the same team quite differently. This project ranks all 32 teams by each measure for the 2024 regular season and identifies the five teams whose rankings differ by at least six places. Kansas City, for instance, ranked 1st by record (15–2) but 11th by point differential (+59). The conclusion is straightforward: on its own, neither measure fully captures how good a team was.
 
 ## Documentation
 
-The full write-up lives in [`docs/`](docs/index.md) and reads in this order:
+The **[live documentation site](https://jconnors23.github.io/510-m1-nfl-data-storytelling/)** is the best way to read this project. The same pages live in [`docs/`](docs/index.md) and read in this order:
 
 1. [Project overview](docs/index.md)
 2. [Data preparation & feature engineering](docs/feature-engineering.md)
@@ -14,16 +16,14 @@ The full write-up lives in [`docs/`](docs/index.md) and reads in this order:
 
 The [2024 ranking walkthrough notebook](notebooks/2024-ranking-walkthrough.ipynb) runs the same steps cell by cell.
 
-## Docs Site
+## Building the Docs Site
 
-The docs are built with [MkDocs](https://www.mkdocs.org/) and the Material theme. Preview locally:
+The site is built with [MkDocs](https://www.mkdocs.org/) and the Material theme, and deploys automatically to GitHub Pages on every push to `main` via `.github/workflows/docs.yml`. To preview it locally:
 
 ```bash
 pip install mkdocs-material
 mkdocs serve          # http://127.0.0.1:8000
 ```
-
-On push to `main`, the site builds and deploys automatically via `.github/workflows/docs.yml`. Once GitHub Pages is enabled for the repo (Settings → Pages → Source = "GitHub Actions"), it is served at <https://jconnors23.github.io/510-m1-nfl-data-storytelling/>.
 
 ## Details
 
