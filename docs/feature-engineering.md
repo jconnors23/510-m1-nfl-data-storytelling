@@ -1,135 +1,112 @@
-# Feature engineering
+---
+hide:
+  - toc
+---
 
-Contract for transforming 2024 REG final scores into `data/2024_record_vs_diff.csv` (one row per club). Operational boundary: schema, grain, and derivations. Findings: [analysis](record-vs-point-diff-analysis.md). Runtime: [README](../README.md). Topology: [analysis pipeline](analysis-pipeline.md).
+# Data Preparation and Feature Engineering
 
-**Upstream:** nflverse schedules Release `games.csv` → `data/nflverse_2024_reg_games.csv` (`season == 2024`, `game_type == "REG"`, scores present). **Downstream:** season CSV; `scripts/record_vs_diff_charts.py`; `scripts/engineered_features_chart.py`. **Failure domain:** Release asset unreachable; `nfl.import_schedules()` (different host — this repo does not use it); null scores dropped at extract; post-aggregate `games ≠ 17`.
+This page covers the **preprocessing and feature engineering**: how 2024 regular-season game scores become the per-team table in `data/processed/2024_record_vs_diff.csv`, one row per team. Preprocessing is the cleaning and reshaping that gets the raw scores into a usable form; feature engineering is building the new columns the analysis actually uses (the two rankings, the gap between them, and the mismatch flag). It also gives the columns, how the data changes shape along the way, and how each number is worked out. For what the results mean, see the [exploratory data analysis](exploratory-data-analysis.md). For the commands to run, see the [README](../README.md).
 
-Each extract row is a completed game’s two point totals (`home_score`, `away_score`). Play-level box-score fields (yards, turnovers, individual stats) are out of scope. Season `point_diff`, record place (`rank_win_pct`), and scoring place (`rank_point_diff`) are compressions of that same 272-game extract. Opponent quality, injuries, and rest sit outside these columns.
+**Where the data comes from:** the nflverse schedules release `games.csv`, filtered to 2024 regular-season games that were actually played, saved as `data/raw/nflverse_2024_reg_games.csv`.
+**What uses this table:** the season CSV feeds both chart scripts, `scripts/record_vs_diff_charts.py` and `scripts/engineered_features_chart.py`.
 
-```text
-nflverse schedules Release
-        │  scripts/pull_schedules.py
-        ▼
-272 game rows     data/nflverse_2024_reg_games.csv
-        │  scripts/record_vs_diff.py
-        ▼
-544 team-game rows     (in memory only)
-        │  summarize_season() + rank_min
-        ▼
-32 team-season rows     data/2024_record_vs_diff.csv
-        │  scripts/record_vs_diff_charts.py
-        │  scripts/engineered_features_chart.py
-        ▼
-figures/record-vs-diff.png
-figures/win-ranking-ahead-of-scoring.png
-figures/engineered-features.png
+Each starting row is one finished game and its two scores (`home_score`, `away_score`). Anything play-by-play (yards, turnovers, individual stats) is not included. Season `point_diff`, the record ranking (`rank_win_pct`), and the point-differential ranking (`rank_point_diff`) are all just summaries of those same 272 games. Opponent quality, injuries, and rest are not in these columns.
+
+## How the Data Changes Shape
+
+```mermaid
+flowchart TD
+  rel["nflverse schedules release"] -->|scripts/pull_schedules.py| g["272 game rows<br/>data/raw/nflverse_2024_reg_games.csv"]
+  g -->|games_to_team_rows| tg["544 team-game rows<br/>(in memory only)"]
+  tg -->|summarize_season + rank| t["32 team rows<br/>data/processed/2024_record_vs_diff.csv"]
 ```
 
-```bash
-python scripts/pull_schedules.py
-python scripts/record_vs_diff.py
-python scripts/record_vs_diff_charts.py
-python scripts/engineered_features_chart.py
-```
-
-## Extract identity
-
-The schedules table is a **GitHub Release** asset, not a file on the [nflverse-data](https://github.com/nflverse/nflverse-data) `main` tree (that tree is automation).
-
-| Attribute | Value |
-| --- | --- |
-| Release | https://github.com/nflverse/nflverse-data/releases/tag/schedules |
-| Asset | https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv |
-| License | [CC-BY-4.0](https://github.com/nflverse/nflverse-data/blob/master/LICENSE.md) |
-| Cite | nflverse (Carl, Baldwin, and the nflverse team) |
-
-`scripts/pull_schedules.py` downloads historical `games.csv` and retains one completed REG season. **Verify:** 272 games, weeks 1–18, 32 clubs. Credit: [source citation](../data/source-citation.md). Grain is **game**, not standings.
-
-## Grain: 272 games → 544 team-games → 32 team-seasons
-
-The extract names two clubs on one line. There is no `team` column, so `groupby("team")` is undefined until an unpivot.
-
-`WHEN` a game row names two clubs `THE SYSTEM SHALL` emit two team-game rows (`games_to_team_rows`). Worked game — week 1, KC 30, SF 17:
-
-| week | home_team | away_team | home_score | away_score |
-| --- | --- | --- | --- | --- |
-| 1 | KC | SF | 30 | 17 |
-
-| Field | KC row | SF row | Derivation |
+| Shape | Count | Where it lives | What each row is |
 | --- | --- | --- | --- |
-| `week` | 1 | 1 | Copy |
+| Game | 272 | `data/raw/nflverse_2024_reg_games.csv` | One played game |
+| Team-game | 544 | In memory only | One team's side of one game |
+| Team-season | 32 | `data/processed/2024_record_vs_diff.csv` | One team's whole season |
+
+## Step 1 — Split Each Game Into Two Team Rows
+
+A game row names two teams, so there is no single `team` column to group on yet. The fix: copy each game into two rows, one written from each team's point of view, swapping which score is "for" and which is "against". This turns 272 games into 544 team-games. Worked game — week 1, KC 30, SF 17:
+
+| Field | KC row | SF row | How it's set |
+| --- | --- | --- | --- |
+| `week` | 1 | 1 | Copied |
 | `team` | KC | SF | `home_team` / `away_team` |
 | `points_for` (PF) | 30 | 17 | `home_score` / `away_score` |
-| `points_against` (PA) | 17 | 30 | Opponent score |
-| `win` | 1 | 0 | `1[PF > PA]` |
-| `loss` | 0 | 1 | `1[PF < PA]` |
-| `point_diff` | +13 | −13 | `PF − PA` (not in the nflverse file) |
+| `points_against` (PA) | 17 | 30 | The opponent's score |
+| `win` | 1 | 0 | 1 if PF is greater than PA |
+| `loss` | 0 | 1 | 1 if PF is less than PA |
+| `point_diff` | +13 | −13 | PF minus PA (not in the nflverse file) |
 
-**INVARIANT:** this extract has no ties (`win + loss = 1` per team-game). A 30–17 result and a 17–16 result are both wins; only per-game `point_diff` distinguishes them. Home/away encode venue, not conference.
+There are no ties in this season, so `win + loss` is always 1 for each team-game. Home and away just mark where the game was played.
 
-| Grain | n | Persistence | Role |
-| --- | --- | --- | --- |
-| Game | 272 | `data/nflverse_2024_reg_games.csv` | Extract |
-| Team-game | 544 | Memory only | Per-game `point_diff`, `win`, `loss` |
-| Team-season | 32 | `data/2024_record_vs_diff.csv` | Totals, places, mismatch |
+## Step 2 — Aggregate Each Team's Season
 
-`summarize_season` aggregates every team-game. **INVARIANT:** `games = 17` for all 32 clubs (18 calendar weeks, one unplayed week per club).
+`summarize_season` combines the team-games into one row per team. Every team plays 17 games (18 weeks, one week off), so `games` should be 17 for all 32 teams.
 
-- `games` = `COUNT` team-games
-- `wins` / `losses` = `SUM(win)` / `SUM(loss)`
-- season `point_diff` = `SUM` of per-game `point_diff`
+- `games` = how many games the team played
+- `wins` / `losses` = the team's total wins / losses
+- season `point_diff` = the sum of every per-game point difference
 - `win_pct` = `wins / games`
 
-Places use pandas `rank(..., method="min")`, `1` = best. Tied `win_pct` shares a place (two 15–2 clubs both 1st; next integer is 3rd). Same tie rule on `point_diff`.
+## Step 3 — Engineer the Features: Two Rankings and Their Gap
+
+This step builds the **engineered features** that carry the analysis — the two rankings, the distance between them, and the mismatch flag. Everything before this was cleaning and adding up; these are the new, derived columns that let one team be compared against another.
+
+Rankings use pandas `rank(method="min")`, where `1` is best. Tied teams share a ranking: KC and DET both went 15–2, so both are 1st, and the next team is 3rd. The same rule applies to `point_diff`.
 
 ```text
-rank_gap          = |rank_win_pct − rank_point_diff|
-mismatch          = rank_gap ≥ 6     (MISMATCH_RANK_GAP)
-record_ahead_by   = rank_point_diff − rank_win_pct
+rank_gap          = the distance between the two rankings (always positive)
+mismatch          = true when rank_gap is 6 or more   (MISMATCH_RANK_GAP)
+record_ahead_by   = rank_point_diff minus rank_win_pct
 ```
 
-Threshold 6 is ≈ one fifth of a 32-club league: 1–2 place noise is ignored. `record_ahead_by > 0` ⇒ record place is numerically better (smaller) than scoring place.
+The number 6 is about a fifth of a 32-team league, so small 1–2 place wobble is ignored. When `record_ahead_by` is positive, the record ranking is better (a smaller number) than the point-differential ranking.
 
-### Worked values — KC 2024 vs DET 2024
+### Worked Example — Kansas City vs. Detroit, 2024
 
-- KC 15–2 → `rank_win_pct = 1` (tied with DET). `point_diff = +59` → `rank_point_diff = 11`. `rank_gap = |1 − 11| = 10` → `mismatch = true`. `record_ahead_by = 11 − 1 = +10`.
-- DET 15–2, `point_diff = +222` → `rank_point_diff = 1`. Places agree → `mismatch = false`.
+- KC 15–2 → record ranking 1 (tied with DET). `point_diff = +59` → point-differential ranking 11. `rank_gap = 10` → `mismatch = true`. `record_ahead_by = 11 − 1 = +10`.
+- DET 15–2, `point_diff = +222` → point-differential ranking 1. Both rankings land in the same place → `mismatch = false`.
 
-Implementation: `build_season_table` in `scripts/record_vs_diff.py`. Replica (no writes): [2024 ranking walkthrough](../notebooks/2024-ranking-walkthrough.ipynb).
+The code is `build_season_table` in `scripts/record_vs_diff.py`. The [2024 ranking walkthrough](../notebooks/2024-ranking-walkthrough.ipynb) runs the same steps in a notebook and writes no files.
 
-## Data dictionary
+## Column Reference
 
-`data/2024_record_vs_diff.csv`: 32 rows. Place `1` = best. KC 2024 is the worked example on [engineered-features.png](../figures/engineered-features.png). Plot-time fields are not persisted.
+`data/processed/2024_record_vs_diff.csv`: 32 rows, ranking `1` = best. KC 2024 is the worked example in the feature chart below. The last two fields (`win_percent`, `record`) are built at chart time from the saved columns and are not stored in the CSV.
 
-| Column | Type | Derivation | Nullable | Persistence | Description | KC 2024 |
+![Feature chart listing each column in the team table with a short description and Kansas City's 2024 value for each.](figures/engineered-features.png)
+
+| Column | Type | How it's built | Empty? | Saved to CSV? | What it means | KC 2024 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `team` | string | Unpivot identity | No | CSV | nflverse club code | KC |
-| `games` | int | `COUNT` team-games | No | CSV | REG games played | 17 |
-| `wins` | int | `SUM(win)` | No | CSV | Wins | 15 |
-| `losses` | int | `SUM(loss)` | No | CSV | Losses | 2 |
-| `point_diff` | float | `SUM(PF − PA)` | No | CSV | Season scoring margin | +59 |
-| `win_pct` | float | `wins / games` | No | CSV | Win rate ∈ `[0, 1]` | 15/17 |
-| `rank_win_pct` | int | `rank_min(win_pct, desc)` | No | CSV | Record place | 1st of 32 |
-| `rank_point_diff` | int | `rank_min(point_diff, desc)` | No | CSV | Scoring place | 11th of 32 |
-| `rank_gap` | int | `\|rank_win_pct − rank_point_diff\|` | No | CSV | Absolute place split | 10 |
-| `mismatch` | bool | `rank_gap ≥ 6` | No | CSV | Flag; `MISMATCH_RANK_GAP = 6` | true |
-| `record_ahead_by` | int | `rank_point_diff − rank_win_pct` | No | CSV | `> 0` ⇒ record place ahead of scoring place | +10 |
-| `win_percent` | float | `win_pct × 100` | — | Plot only | Scatter x-axis | — |
-| `record` | string | `"{wins}–{losses}"` | — | Plot only | Record as text | `15–2` |
-| `label` | string | `"{team}  {record}"` | — | Plot only | Bar-axis label | `KC  15–2` |
+| `team` | string | From the game rows | No | Yes | nflverse team code | KC |
+| `games` | int | Count of games | No | Yes | Games played | 17 |
+| `wins` | int | Sum of wins | No | Yes | Wins | 15 |
+| `losses` | int | Sum of losses | No | Yes | Losses | 2 |
+| `point_diff` | float | Sum of (PF − PA) | No | Yes | Season point differential | +59 |
+| `win_pct` | float | `wins / games` | No | Yes | Win rate between 0 and 1 | 15/17 |
+| `rank_win_pct` | int | Rank by `win_pct`, best first | No | Yes | Record ranking | 1st of 32 |
+| `rank_point_diff` | int | Rank by `point_diff`, best first | No | Yes | Point-differential ranking | 11th of 32 |
+| `rank_gap` | int | Distance between the two rankings | No | Yes | How far apart the rankings are | 10 |
+| `mismatch` | bool | `rank_gap ≥ 6` | No | Yes | Flag; threshold is 6 | true |
+| `record_ahead_by` | int | `rank_point_diff − rank_win_pct` | No | Yes | Positive means record ranking is ahead | +10 |
+| `win_percent` | float | `win_pct × 100` | — | No (chart only) | Scatter x-axis | — |
+| `record` | string | `"{wins}–{losses}"` | — | No (chart only) | Record as text | `15–2` |
 
-`win_pct` feeds `rank_win_pct`. Per-game `point_diff` is built in memory, then summed to the season total used on the feature chart.
+`win_pct` drives the record ranking. Per-game `point_diff` is built along the way, then added up into the season total shown on the feature chart.
 
-## Out of contract
+## Deliberate Exclusions
 
-These omissions are constraints on what the two places can mean, not backlog.
+These are limits on what the two rankings can tell you, not a to-do list.
 
-| Left out | Rationale |
+| Left out | Why |
 | --- | --- |
-| Opponent-adjusted margin | Extract is schedules + scores only. `point_diff` is unweighted across opponents and has no per-play efficiency. |
-| Mid-season or rest-of-season cut | One ranking of the finished 17-game REG season; not a forecast. |
-| Pre-game feature table | Not a next-game prediction model. |
-| Rest between games | Rest fields exist on the extract; this ranking does not consume them. |
-| Play-by-play, injuries, weather, coaching | Outside the extract. Strength is not identified by `win_pct` or `point_diff` alone. |
+| Opponent-adjusted point differential | The data is only schedules and scores, so `point_diff` treats every opponent the same. |
+| A mid-season or partial cut | This ranks the finished 17-game season as one whole. |
+| A pre-game feature table | This describes the completed season; game-level forecasting features live elsewhere. |
+| Rest between games | Rest is in the source data, but this ranking does not use it. |
+| Play-by-play, injuries, weather, coaching | Not in the source data. Win rate or point differential alone does not capture team strength. |
 
-**Also:** [analysis](record-vs-point-diff-analysis.md) · [analysis pipeline](analysis-pipeline.md) · [README](../README.md) · [walkthrough](../notebooks/2024-ranking-walkthrough.ipynb)
+**See also:** [reproduction pipeline](reproduction-pipeline.md) · [exploratory data analysis](exploratory-data-analysis.md) · [conclusions](conclusions.md) · [README](../README.md) · [walkthrough](../notebooks/2024-ranking-walkthrough.ipynb)

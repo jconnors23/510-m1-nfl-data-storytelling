@@ -1,0 +1,57 @@
+site_name: NFL Record vs. Point Differential (2024)
+site_description: >-
+  Lines up 2024 NFL teams by win-loss record and by point differential, and
+  finds the teams that land in very different spots on the two lists.
+repo_url: https://github.com/jconnors23/510-m1-nfl-data-storytelling
+docs_dir: docs
+
+# Docs pages link to repo-tree files that live outside docs_dir on purpose
+# (README, notebooks/, data/) so the same links also resolve when browsing the
+# repository on GitHub. Those cross-tree links are not part of the built site,
+# so relative-link resolution is downgraded from error to info; any broken
+# in-site anchor still fails the build. The figures/ images DO resolve in the
+# site via the docs/figures symlink, so they are not affected.
+validation:
+  links:
+    not_found: info
+    absolute_links: info
+    unrecognized_links: info
+  anchors: warn
+
+theme:
+  name: material
+  # Force dark mode (no OS-based switching, no toggle).
+  palette:
+    scheme: slate
+    primary: black
+    accent: red
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Project Overview: index.md
+  - Data Preparation & Feature Engineering: feature-engineering.md
+  - Reproduction Pipeline: reproduction-pipeline.md
+  - Exploratory Data Analysis: exploratory-data-analysis.md
+  - Conclusions: conclusions.md

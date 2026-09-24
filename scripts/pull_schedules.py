@@ -1,7 +1,7 @@
 """Pull 2024 regular-season completed games from the nflverse schedules release.
 
 Downloads the full historical `games.csv`, then keeps one finished regular
-season (272 games, 32 teams). That extract is the input to `record_vs_diff.py`.
+season (272 games, 32 teams). That file is the input to `record_vs_diff.py`.
 """
 
 from pathlib import Path
@@ -18,8 +18,8 @@ SCHEDULES_URL = (
 SEASON = 2024  # This story is 2024 only; the Release CSV holds many years.
 # This file lives in scripts/; the repo root is one folder up.
 REPO_ROOT = Path(__file__).resolve().parents[1]
-# Filtered extract: 2024 REG games with final scores (272 rows).
-OUT_PATH = REPO_ROOT / "data" / "nflverse_2024_reg_games.csv"
+# Filtered file: 2024 regular-season games with final scores (272 rows).
+OUT_PATH = REPO_ROOT / "data" / "raw" / "nflverse_2024_reg_games.csv"
 
 
 def pull_regular_season(url: str = SCHEDULES_URL, season: int = SEASON) -> pd.DataFrame:
@@ -46,9 +46,9 @@ def pull_regular_season(url: str = SCHEDULES_URL, season: int = SEASON) -> pd.Da
 
 
 def main() -> None:
-    """Write the 2024 regular-season extract to `data/` and print a short summary."""
+    """Write the 2024 regular-season file to `data/raw/` and print a short summary."""
     season_games = pull_regular_season()
-    # Make data/ if it is missing, then write the filtered table as CSV.
+    # Make data/raw/ if it is missing, then write the filtered table as CSV.
     # index=False so pandas does not add a row-number column.
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     season_games.to_csv(OUT_PATH, index=False)

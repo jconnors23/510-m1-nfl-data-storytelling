@@ -1,0 +1,101 @@
+/* Slightly larger, more readable body text across the site. */
+:root {
+  --md-typeset-font-size: 0.9rem;
+}
+
+.md-typeset {
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+/* Roomier headings so pages are easy to scan. */
+.md-typeset h1 {
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset h2 {
+  font-size: 1.55rem;
+  margin-top: 2.2rem;
+}
+
+.md-typeset h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+}
+
+/* A comfortable reading width on wide screens. */
+.md-grid {
+  max-width: 62rem;
+}
+
+/* Charts: center, frame, and let them scale down on small screens. */
+.md-typeset img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.4rem auto;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Tables: a touch larger and easier to read. */
+.md-typeset table:not([class]) {
+  font-size: 0.92rem;
+}
+
+/* Center rendered mermaid diagrams. */
+.md-typeset .mermaid {
+  text-align: center;
+  margin: 1.6rem 0;
+}
+
+/* Inline code stands out a little more in dark mode. */
+[data-md-color-scheme="slate"] .md-typeset code {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* -- Left navigation: larger, clearer link text -- */
+.md-nav {
+  font-size: 0.9rem;
+}
+
+/* The site title at the top of the left nav. */
+.md-nav--primary > .md-nav__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* Each page link in the left nav. */
+.md-nav__item .md-nav__link {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  padding: 0.15rem 0;
+}
+
+/* The currently open page stands out. */
+.md-nav__link--active {
+  font-weight: 700;
+}
+
+/* Slightly wider left sidebar so bigger links do not wrap awkwardly. */
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary {
+    width: 13rem;
+  }
+}
+
+/* No per-page table of contents anywhere: hide the right-hand TOC column so the
+   left navigation is the only index, one entry per page. */
+.md-sidebar--secondary,
+.md-nav--secondary {
+  display: none !important;
+}
+
+/* Reclaim the space the TOC column used so content is centered. */
+@media screen and (min-width: 76.25em) {
+  .md-content {
+    max-width: none;
+  }
+}

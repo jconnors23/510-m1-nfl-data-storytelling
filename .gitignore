@@ -1,8 +1,6 @@
-# Local-only working docs and MkDocs
+# Local-only working docs
 local/
 local-docs/
-.mkdocs-site/
-mkdocs.yml
 
 # Editor / agent (not part of the graded GitHub tree)
 .cursor/
@@ -21,3 +19,6 @@ __pycache__/
 
 # Local writing-style exports (not the course tree)
 export-writing-sample-*.md
+
+# MkDocs build output (mkdocs.yml is tracked so GitHub Pages can build the site)
+site/

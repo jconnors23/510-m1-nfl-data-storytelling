@@ -1,0 +1,56 @@
+name: Publish docs to GitHub Pages
+
+# Build the MkDocs site on every push to main and deploy it to GitHub Pages.
+# Enable once in the repo: Settings -> Pages -> Source = "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a newer run supersede an in-progress one; do not cancel a live deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install MkDocs and the Material theme
+        run: pip install mkdocs-material
+
+      - name: Confirm mkdocs.yml is present
+        run: |
+          if [ ! -f mkdocs.yml ]; then
+            echo "::error::mkdocs.yml is missing. It is gitignored by default; commit it (or provide it in CI) so the site can build."
+            exit 1
+          fi
+
+      - name: Build the site
+        run: mkdocs build --strict
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

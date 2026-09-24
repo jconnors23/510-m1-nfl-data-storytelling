@@ -1,7 +1,7 @@
 """Draw a one-column-per-feature chart of the 2024 ranking table.
 
-Reads Kansas City’s row from `data/2024_record_vs_diff.csv` so the example
-column matches the CSV. Writes `figures/engineered-features.png`.
+Reads Kansas City’s row from `data/processed/2024_record_vs_diff.csv` so the
+example column matches the CSV. Writes `data/figures/engineered-features.png`.
 """
 
 from pathlib import Path
@@ -13,20 +13,20 @@ import pandas as pd
 # This file lives in scripts/; the repo root is one folder up.
 REPO_ROOT = Path(__file__).resolve().parents[1]
 # 32-team ranking (one row per team) written by record_vs_diff.py.
-TABLE_PATH = REPO_ROOT / "data" / "2024_record_vs_diff.csv"
-FIGURES_DIR = REPO_ROOT / "figures"
+TABLE_PATH = REPO_ROOT / "data" / "processed" / "2024_record_vs_diff.csv"
+FIGURES_DIR = REPO_ROOT / "data" / "figures"
 OUT_PATH = FIGURES_DIR / "engineered-features.png"
 
 TITLE_COLOR = "#222222"
 MUTED_TEXT = "#5a6570"
-# Group tints: scoring, rankings, gap — light so body text stays readable.
+# Group tints: point differential, rankings, gap — light so body text stays readable.
 GROUP_COLORS = {
-    "Scoring margin": "#eef1f4",
+    "Point differential": "#eef1f4",
     "Two rankings": "#e8eef4",
     "Gap between rankings": "#f6eeef",
 }
 ACCENT = {
-    "Scoring margin": "#5c6b7a",
+    "Point differential": "#5c6b7a",
     "Two rankings": "#3d5a73",
     "Gap between rankings": "#c41e3a",
 }
@@ -63,7 +63,7 @@ def feature_rows(kc: pd.Series) -> list[tuple[str, str, str, str]]:
     ahead_text = f"+{ahead} spots" if ahead > 0 else f"{ahead} spots"
     return [
         (
-            "Scoring margin",
+            "Point differential",
             "point_diff",
             "Points scored minus points allowed, added up over 17 games",
             f"{int(kc['point_diff']):+d}",
@@ -77,7 +77,7 @@ def feature_rows(kc: pd.Series) -> list[tuple[str, str, str, str]]:
         (
             "Two rankings",
             "rank_point_diff",
-            "Place among 32 teams by scoring margin (1 = best)",
+            "Place among 32 teams by point differential (1 = best)",
             f"{int(kc['rank_point_diff'])}th of 32",
         ),
         (
@@ -95,7 +95,7 @@ def feature_rows(kc: pd.Series) -> list[tuple[str, str, str, str]]:
         (
             "Gap between rankings",
             "record_ahead_by",
-            "Scoring place minus win place; + means the win ranking is ahead",
+            "Point-diff place minus record place; + means the record ranking is ahead",
             ahead_text,
         ),
     ]
@@ -114,7 +114,7 @@ def plot_feature_map(kc: pd.Series, out_path: Path = OUT_PATH) -> Path:
     rows = feature_rows(kc)
     # Short group labels so they fit a left column without hitting `column`.
     group_short = {
-        "Scoring margin": "1. Margin",
+        "Point differential": "1. Point diff",
         "Two rankings": "2. Rankings",
         "Gap between rankings": "3. Gap",
     }
@@ -127,23 +127,28 @@ def plot_feature_map(kc: pd.Series, out_path: Path = OUT_PATH) -> Path:
     fig.patch.set_facecolor("white")
 
     fig.text(
-        0.025,
-        0.96,
-        "Engineered features — one column each",
+        0.5,
+        0.965,
+        "Engineered Features: One Column Each",
         fontsize=18,
         fontweight="bold",
         color=TITLE_COLOR,
-        ha="left",
+        ha="center",
         va="top",
         transform=fig.transFigure,
     )
+    # Underline rule centered beneath the title.
+    fig.add_artist(
+        plt.Line2D([0.32, 0.68], [0.925, 0.925], transform=fig.transFigure,
+                   color=TITLE_COLOR, linewidth=1.6)
+    )
     fig.text(
-        0.025,
-        0.915,
+        0.5,
+        0.905,
         "Kansas City 2024 (15–2) is the example. Rank 1 = best among 32 teams.",
         fontsize=12,
         color=MUTED_TEXT,
-        ha="left",
+        ha="center",
         va="top",
         transform=fig.transFigure,
     )
@@ -246,7 +251,7 @@ def plot_feature_map(kc: pd.Series, out_path: Path = OUT_PATH) -> Path:
 
 
 def main() -> None:
-    """Write `figures/engineered-features.png` and print the path."""
+    """Write `data/figures/engineered-features.png` and print the path."""
     kc = load_kansas_city()
     path = plot_feature_map(kc)
     print(f"Wrote {path.relative_to(REPO_ROOT)}")
