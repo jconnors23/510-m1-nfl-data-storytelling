@@ -7,7 +7,7 @@ hide:
 
 This is the **exploratory data analysis (EDA)**: what stood out when the 2024 season was charted and compared.
 
-There are two common ways to sum up a football team's season: its **win–loss record**, and its **point differential** (all the points it scored minus all the points it allowed). For most teams the two match up — teams that win a lot also outscore their opponents. This page looks at the 2024 teams where the two measures give a noticeably different picture, explains what the charts show, and states plainly what these numbers can and cannot tell you.
+A team's season can be measured by its **win–loss record** or by its **point differential** (all the points it scored minus all the points it allowed). For most teams the two measures line up — teams that win a lot also outscore their opponents. This page looks at the 2024 teams where the two give a noticeably different picture, explains what the charts show, and states plainly what these numbers can and cannot tell you.
 
 For how each column is built, see [data preparation and feature engineering](feature-engineering.md). For the steps to run it yourself, see the [reproduction pipeline](reproduction-pipeline.md). The finished table is `data/processed/2024_record_vs_diff.csv`. The [notebook](../notebooks/2024-ranking-walkthrough.ipynb) runs the same steps and saves nothing.
 
