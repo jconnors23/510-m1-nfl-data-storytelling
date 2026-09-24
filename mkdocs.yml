@@ -28,12 +28,17 @@ theme:
     scheme: slate
     primary: black
     accent: red
+  # A small, explicit header icon. Without one, Material's default book logo is
+  # an inline SVG that renders full-width for a moment before the CSS loads,
+  # which looks like a giant black book on a slow or interrupted first paint.
+  icon:
+    logo: material/chart-scatter-plot
   font:
     text: Inter
     code: JetBrains Mono
   features:
-    - navigation.instant     # load pages without a full reload
-    - navigation.instant.progress  # thin progress bar on instant navigation
+    # navigation.instant is intentionally left off: on a small site its benefit
+    # is marginal, and its content-swap can flash unstyled markup on first load.
     - navigation.top         # back-to-top button
     - navigation.footer      # previous / next links at the page bottom
     - content.code.copy      # copy button on code blocks
