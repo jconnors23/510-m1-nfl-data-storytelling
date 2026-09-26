@@ -1,8 +1,4 @@
 /* Slightly larger, more readable body text across the site. */
-:root {
-  --md-typeset-font-size: 0.9rem;
-}
-
 .md-typeset {
   font-size: 1.02rem;
   line-height: 1.7;
@@ -56,7 +52,7 @@
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* -- Left navigation: larger, clearer link text -- */
+/* Left navigation: larger, clearer link text. */
 .md-nav {
   font-size: 0.9rem;
 }

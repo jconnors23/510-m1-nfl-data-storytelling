@@ -5,9 +5,13 @@ hide:
 
 # Project Overview
 
+### 🎥 Watch the presentation: **[youtu.be/sqv3Oi22v5w](https://youtu.be/sqv3Oi22v5w?si=4DbluZcx6Qlugwai)**
+### 💻 Code and data: **[GitHub repository](https://github.com/jconnors23/510-m1-nfl-data-storytelling)**
+### 🤖 How AI was used: **[design manifest](https://github.com/jconnors23/510-m1-nfl-data-storytelling/blob/main/design-manifest.md)**
+
 Win–loss record and point differential (total points scored minus total points allowed) are two standard measures of a football team's season. This project ranks all 32 teams by each measure for the 2024 regular season and identifies the teams whose two rankings differ by at least six places. The conclusion is straightforward: on its own, neither measure fully captures how good a team was.
 
-This is the documentation site. The repository `README.md` has the commands to run and the list of files; the pages below carry the exploratory data analysis (EDA), the engineered features, and the story the data tells.
+This is the documentation site. The pages below carry the exploratory data analysis (EDA), the engineered features, and the story the data tells; the [GitHub repository](https://github.com/jconnors23/510-m1-nfl-data-storytelling) has the code, the data, and the commands to run it.
 
 ## Audience and Motivation
 
@@ -23,7 +27,7 @@ Every completed 2024 regular-season game and its final score, from the public nf
 flowchart TD
   rel["nflverse schedules release<br/>(games.csv)"] -->|pull_schedules.py| games["data/raw/nflverse_2024_reg_games.csv<br/>272 games"]
   games -->|record_vs_diff.py| table["data/processed/2024_record_vs_diff.csv<br/>32 teams"]
-  table -->|record_vs_diff_charts.py| charts["data/figures/<br/>scatter + dumbbell"]
+  table -->|record_vs_diff_charts.py| charts["data/figures/<br/>scatter, dumbbell, gap distribution"]
   table -->|engineered_features_chart.py| feat["data/figures/<br/>feature chart"]
 ```
 

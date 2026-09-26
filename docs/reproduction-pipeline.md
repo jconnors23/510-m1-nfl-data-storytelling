@@ -70,6 +70,6 @@ flowchart TD
   table --> map["Feature chart: one row per column"]
 ```
 
-Across all 32 teams the average `rank_gap` is **2.9** and the middle value is **2.5**. The mismatch cutoff is a gap of **6** or more.
+Across all 32 teams the average `rank_gap` is **2.9**. The mismatch cutoff is a gap of **6** or more.
 
 **See also:** [data preparation and feature engineering](feature-engineering.md) · [exploratory data analysis](exploratory-data-analysis.md) · [conclusions](conclusions.md) · [README](../README.md) · [source citation](../data/source-citation.md)

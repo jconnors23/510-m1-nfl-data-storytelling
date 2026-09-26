@@ -6,6 +6,9 @@ site_description: >-
 # social-card / preview metadata; without it those point at the wrong place.
 site_url: https://jconnors23.github.io/510-m1-nfl-data-storytelling/
 repo_url: https://github.com/jconnors23/510-m1-nfl-data-storytelling
+# Labels the repository button in the site header so the code is one click away
+# from every page.
+repo_name: jconnors23/510-m1-nfl-data-storytelling
 docs_dir: docs
 
 # Docs pages link to repo-tree files that live outside docs_dir on purpose

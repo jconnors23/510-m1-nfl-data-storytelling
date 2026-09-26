@@ -1,6 +1,8 @@
 # 2024 NFL Record vs. Point Differential
 
 ### 📊 Read the full write-up: **[jconnors23.github.io/510-m1-nfl-data-storytelling](https://jconnors23.github.io/510-m1-nfl-data-storytelling/)**
+### 🎥 Watch the presentation: **[youtu.be/sqv3Oi22v5w](https://youtu.be/sqv3Oi22v5w?si=4DbluZcx6Qlugwai)**
+### 🤖 How AI was used: **[design manifest](design-manifest.md)**
 
 Win–loss record and point differential (total points scored minus total points allowed) are two standard measures of a football team's season, and they can rank the same team quite differently. This project ranks all 32 teams by each measure for the 2024 regular season and identifies the five teams whose rankings differ by at least six places. Kansas City, for instance, ranked 1st by record (15–2) but 11th by point differential (+59). The conclusion is straightforward: on its own, neither measure fully captures how good a team was.
 

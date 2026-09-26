@@ -235,7 +235,7 @@ def plot_feature_map(kc: pd.Series, out_path: Path = OUT_PATH) -> Path:
     fig.text(
         0.025,
         0.03,
-        "Built in scripts/record_vs_diff.py. Per-game point_diff lives only in memory; this chart uses the season total.",
+        "Built in scripts/record_vs_diff.py",
         fontsize=9,
         color=MUTED_TEXT,
         ha="left",

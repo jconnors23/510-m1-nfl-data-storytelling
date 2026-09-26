@@ -100,17 +100,17 @@ def style_slide_axes(ax: plt.Axes) -> None:
 
 
 def centered_title(
-    fig: plt.Figure, title: str, subtitle: str, top: float = 0.98
+    fig: plt.Figure, title: str, subtitle: str = "", top: float = 0.98
 ) -> None:
-    """Draw a bold title, an underline rule, and a subtitle as one tight block.
+    """Draw a bold title, an underline rule, and an optional subtitle as one block.
 
-    Both the title and the subtitle are drawn as figure text at fixed y
+    The title and (when given) the subtitle are drawn as figure text at fixed y
     positions just below the top of the figure, with the underline rule between
     them. Keeping both lines here (instead of a figure suptitle plus a separate
     per-axes title) means there is no empty band whose size depends on the axes
-    height or on `tight_layout` — the three pieces always sit together. Reserve
-    the matching top strip with `fig.subplots_adjust(top=...)` or a
-    `tight_layout(rect=...)` in the caller so the plot starts just below.
+    height or on `tight_layout` — the pieces always sit together. Reserve the
+    matching top strip with `fig.subplots_adjust(top=...)` in the caller so the
+    plot starts just below. Pass no subtitle for a title-only header.
 
     Matplotlib has no underline, so the rule is a short horizontal line drawn in
     figure coordinates under the title text.
@@ -123,8 +123,9 @@ def centered_title(
     line = plt.Line2D([0.30, 0.70], [rule_y, rule_y], transform=fig.transFigure,
                       color=TITLE_COLOR, linewidth=1.6)
     fig.add_artist(line)
-    fig.text(0.5, subtitle_y, subtitle, fontsize=11, color=MUTED_TEXT,
-             ha="center", va="top", wrap=True)
+    if subtitle:
+        fig.text(0.5, subtitle_y, subtitle, fontsize=11, color=MUTED_TEXT,
+                 ha="center", va="top", wrap=True)
 
 
 def save_figure(fig: plt.Figure, name: str) -> Path:
@@ -346,6 +347,12 @@ def plot_rank_gap_distribution(teams: pd.DataFrame) -> Path:
     sns.set_theme(style="white", context="talk")
     counts = teams["rank_gap"].value_counts().sort_index()
 
+    # Stats computed from the data so the labels never drift from the chart.
+    total = len(teams)
+    n_mismatch = int((teams["rank_gap"] >= 6).sum())
+    pct_mismatch = round(100 * n_mismatch / total)
+    mean_gap = teams["rank_gap"].mean()
+
     fig, ax = plt.subplots(figsize=(11.8, 6.0))
     fig.patch.set_facecolor("white")
     colors = [MISMATCH_COLOR if g >= 6 else MATCH_COLOR for g in counts.index]
@@ -354,24 +361,43 @@ def plot_rank_gap_distribution(teams: pd.DataFrame) -> Path:
         ax.text(g, c + 0.1, str(int(c)), ha="center", va="bottom",
                 fontsize=10, color=TITLE_COLOR, fontweight="bold")
 
+    # Headroom above the tallest bar for the reference-line labels and callout.
+    y_top = counts.values.max() + 2.2
+    ax.set_ylim(0, y_top)
+
+    # Average gap as a single reference line (the median adds little for this
+    # right-skewed count, so it is left off). Label sits to the right of the
+    # line, like the cutoff label, and above the bars so it stays clear of the
+    # nearby count.
+    stat_color = "#1f2933"
+    ax.axvline(mean_gap, color=stat_color, linewidth=2.0, linestyle="--", zorder=4)
+    ax.text(mean_gap + 0.15, y_top * 0.94, f"average gap ({mean_gap:.1f})",
+            color=stat_color, fontsize=10, fontweight="bold",
+            ha="left", va="top")
+
     # The cutoff sits at 5.5 so the line falls between the gray and red bars.
     ax.axvline(5.5, color=MISMATCH_COLOR, linewidth=1.6, linestyle="--", zorder=3)
-    ax.text(5.6, ax.get_ylim()[1] * 0.9, "mismatch cutoff (6)",
+    ax.text(5.6, y_top * 0.52, "mismatch\ncutoff (6)",
             color=MISMATCH_COLOR, fontsize=10, fontweight="bold", va="top")
+
+    # Headline metric over the red region: how many teams cleared the cutoff.
+    ax.text(
+        counts.index.max(), y_top * 0.9,
+        f"{n_mismatch} of {total} teams\n({pct_mismatch}%) are mismatches",
+        color=MISMATCH_COLOR, fontsize=12, fontweight="bold", ha="right", va="top",
+        bbox={"boxstyle": "round,pad=0.4", "facecolor": "white",
+              "edgecolor": MISMATCH_COLOR, "linewidth": 1.2},
+    )
 
     ax.set_xlabel("Ranking gap \u2014 places between a team's record and point-differential ranks",
                   fontsize=12, color=TITLE_COLOR, fontweight="bold")
     ax.set_ylabel("Number of teams", fontsize=12, color=TITLE_COLOR, fontweight="bold")
-    centered_title(
-        fig,
-        "Ranking Gap Across All 32 Teams, 2024",
-        "Gap across all 32 teams: average 2.9, middle value 2.5. Red bars (gap 6 or more) are the "
-        "five mismatch teams.",
-    )
+    centered_title(fig, "Ranking Gap Across All 32 Teams, 2024")
     ax.set_xticks(range(0, int(counts.index.max()) + 1))
     ax.grid(axis="y", color="#eef1f4", linewidth=1)
     style_slide_axes(ax)
-    fig.subplots_adjust(top=0.88, bottom=0.12, left=0.08, right=0.975)
+    # Title-only header (no subtitle), so a bit more plot height.
+    fig.subplots_adjust(top=0.90, bottom=0.12, left=0.08, right=0.975)
     return save_figure(fig, "rank-gap-distribution.png")
 
 

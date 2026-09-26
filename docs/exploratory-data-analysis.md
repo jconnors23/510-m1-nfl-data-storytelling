@@ -13,7 +13,7 @@ For how each column is built, see [data preparation and feature engineering](fea
 
 **The main question:** if you rank all 32 teams by record, and separately by point differential, how far does a team move between the two lists?
 
-**The answer:** *5 of 32 teams move at least 6 places.* In all five, the team ranks **higher by record than by point differential** — it won often, but its season point differential was more modest than its record suggests.
+**The answer:** *5 of 32 teams move at least 6 places — 16%, or about 1 in 6.* In all five, the team ranks **higher by record than by point differential** — it won often, but its season point differential was more modest than its record suggests. That share is small enough that the two measures usually agree, but large enough that a mismatch is not a fluke: roughly one team in six lands in a very different place depending on which measure you lead with.
 
 The two measures count different things, and that is the whole reason they can rank the same team in very different places:
 
@@ -33,9 +33,9 @@ Tied teams share a place. Kansas City and Detroit both went 15–2, so both are 
 
 A team is a **mismatch** when it sits **at least 6 places apart** on the two lists (about a fifth of a 32-team league). Six is simply the cutoff chosen so that small, one- or two-place differences are not counted. Both lists are valid summaries; the gap just flags where they diverge. This covers the whole regular season: 18 weeks, 17 games per team, taken as one finished period.
 
-Across all 32 teams, the typical move between the two lists is small — **about 3 places** (average 2.9, middle value 2.5). The mismatch cutoff sits at 6. The chart below shows the full spread: most teams sit at a gap of 0–5, and only five reach 6 or more.
+Across all 32 teams, the typical move between the two lists is small — the **average gap is 2.9 places**. The mismatch cutoff sits at 6. The chart below shows the full spread: most teams sit at a gap of 0–5, and only five reach 6 or more.
 
-![Bar chart counting how many teams fall at each ranking-gap value from 0 to 10. Bars up to 5 are gray; bars at 6 and above are red, with a dashed line marking the mismatch cutoff of 6.](figures/rank-gap-distribution.png)
+![Bar chart counting how many teams fall at each ranking-gap value from 0 to 10. Bars up to 5 are gray; bars at 6 and above are red, with a dashed line marking the mismatch cutoff of 6. A dashed reference line marks the average gap (2.9), and a callout notes that 5 of 32 teams (16%) are mismatches.](figures/rank-gap-distribution.png)
 
 ```mermaid
 flowchart TD
@@ -127,6 +127,6 @@ The responsible practice is to **show more than one measure, name what each leav
 
 - Record and point differential are two summaries of the **same 272 games**; each counts a different detail.
 - **Neither number, on its own, is how good a team was.** Opponent, injuries, close games, and late scoring are outside both.
-- The 2024 mismatch group is *five teams, all ranking higher by record than by point differential.* The sharpest same-record contrast is **KC 15–2 vs DET 15–2**.
+- The 2024 mismatch group is *five teams — 16% of the league, about 1 in 6 — all ranking higher by record than by point differential.* The sharpest same-record contrast is **KC 15–2 vs DET 15–2**.
 
 **See also:** [data preparation and feature engineering](feature-engineering.md) · [reproduction pipeline](reproduction-pipeline.md) · [conclusions](conclusions.md) · [README](../README.md) · [walkthrough](../notebooks/2024-ranking-walkthrough.ipynb)
